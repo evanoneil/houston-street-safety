@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Setup sidebar toggle
         setupSidebarToggle();
         
+        // Setup filter toggle
+        setupFilterToggle();
+        
     } catch (error) {
         console.error('Error initializing application:', error);
         document.getElementById('map').innerHTML = `
@@ -411,4 +414,35 @@ function setupSidebarToggle() {
             mapCredits.style.left = '20px';
         }
     });
+}
+
+// Add functionality to toggle filters section
+function setupFilterToggle() {
+    const filterHeader = document.querySelector('.filter-header');
+    const filterToggle = document.getElementById('filter-toggle');
+    const filterContent = document.getElementById('filter-content');
+    
+    // Store the full height for animation
+    const filterContentHeight = filterContent.scrollHeight;
+    filterContent.style.maxHeight = filterContentHeight + 'px';
+    
+    // Add click event to the header and toggle button
+    filterHeader.addEventListener('click', toggleFilters);
+    filterToggle.addEventListener('click', function(e) {
+        e.stopPropagation(); // Prevent double-triggering when clicking the button
+        toggleFilters();
+    });
+    
+    function toggleFilters() {
+        // Toggle the collapsed class
+        filterContent.classList.toggle('collapsed');
+        filterToggle.classList.toggle('collapsed');
+        
+        // Set max-height based on collapsed state
+        if (filterContent.classList.contains('collapsed')) {
+            filterContent.style.maxHeight = '0';
+        } else {
+            filterContent.style.maxHeight = filterContentHeight + 'px';
+        }
+    }
 } 

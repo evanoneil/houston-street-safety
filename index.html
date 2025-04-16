@@ -29,83 +29,90 @@
                 </div>
                 
                 <div class="control-panel">
-                    <h2>Filters</h2>
-                    <div class="filter-group">
-                        <label class="filter-group-label">Crash Type:</label>
-                        <div class="dropdown-filter">
-                            <button class="dropdown-toggle">Select Crash Types</button>
-                            <div class="dropdown-content">
-                                <label class="checkbox-container">
-                                    <input type="checkbox" name="crash-type" value="all" checked> <span>All Crashes</span>
-                                </label>
-                                <label class="checkbox-container">
-                                    <input type="checkbox" name="crash-type" value="pedestrian"> <span>Pedestrian Only</span>
-                                </label>
-                                <label class="checkbox-container">
-                                    <input type="checkbox" name="crash-type" value="cyclist"> <span>Cyclist Only</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-group-label">Severity:</label>
-                        <div class="dropdown-filter">
-                            <button class="dropdown-toggle">Select Severity</button>
-                            <div class="dropdown-content">
-                                <label class="checkbox-container">
-                                    <input type="checkbox" name="crash-severity" value="all" checked> <span>All Severities</span>
-                                </label>
-                                <label class="checkbox-container">
-                                    <input type="checkbox" name="crash-severity" value="K"> <span>K - Fatal</span>
-                                </label>
-                                <label class="checkbox-container">
-                                    <input type="checkbox" name="crash-severity" value="A"> <span>A - Suspected Serious</span>
-                                </label>
-                                <label class="checkbox-container">
-                                    <input type="checkbox" name="crash-severity" value="B"> <span>B - Suspected Minor</span>
-                                </label>
-                                <label class="checkbox-container">
-                                    <input type="checkbox" name="crash-severity" value="C"> <span>C - Possible Injury</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="filter-group">
-                        <label class="filter-group-label">Year:</label>
-                        <div class="dropdown-filter">
-                            <button class="dropdown-toggle">Select Years</button>
-                            <div class="dropdown-content">
-                                <div id="year-checkbox-group">
+                    <h2 class="filter-header">
+                        Filters
+                        <button class="filter-toggle" id="filter-toggle">
+                            <span class="filter-toggle-icon">▼</span>
+                        </button>
+                    </h2>
+                    <div class="filter-content" id="filter-content">
+                        <div class="filter-group">
+                            <label class="filter-group-label">Crash Type:</label>
+                            <div class="dropdown-filter">
+                                <button class="dropdown-toggle">Select Crash Types</button>
+                                <div class="dropdown-content">
                                     <label class="checkbox-container">
-                                        <input type="checkbox" name="crash-year" value="all" checked> <span>All Years</span>
+                                        <input type="checkbox" name="crash-type" value="all" checked> <span>All Crashes</span>
                                     </label>
                                     <label class="checkbox-container">
-                                        <input type="checkbox" name="crash-year" value="2020"> <span>2020</span>
+                                        <input type="checkbox" name="crash-type" value="pedestrian"> <span>Pedestrian Only</span>
                                     </label>
                                     <label class="checkbox-container">
-                                        <input type="checkbox" name="crash-year" value="2021"> <span>2021</span>
-                                    </label>
-                                    <label class="checkbox-container">
-                                        <input type="checkbox" name="crash-year" value="2022"> <span>2022</span>
-                                    </label>
-                                    <label class="checkbox-container">
-                                        <input type="checkbox" name="crash-year" value="2023"> <span>2023</span>
-                                    </label>
-                                    <label class="checkbox-container">
-                                        <input type="checkbox" name="crash-year" value="2024"> <span>2024</span>
+                                        <input type="checkbox" name="crash-type" value="cyclist"> <span>Cyclist Only</span>
                                     </label>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="layer-toggles">
-                        <label class="toggle-container">
-                            <input type="checkbox" id="toggle-heatmap" class="layer-toggle-checkbox">
-                            <span class="toggle-label">Show Heatmap</span>
-                        </label>
+                        
+                        <div class="filter-group">
+                            <label class="filter-group-label">Severity:</label>
+                            <div class="dropdown-filter">
+                                <button class="dropdown-toggle">Select Severity</button>
+                                <div class="dropdown-content">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-severity" value="all" checked> <span>All Severities</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-severity" value="K"> <span>K - Fatal</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-severity" value="A"> <span>A - Suspected Serious</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-severity" value="B"> <span>B - Suspected Minor</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-severity" value="C"> <span>C - Possible Injury</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-group-label">Year:</label>
+                            <div class="dropdown-filter">
+                                <button class="dropdown-toggle">Select Years</button>
+                                <div class="dropdown-content">
+                                    <div id="year-checkbox-group">
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" name="crash-year" value="all" checked> <span>All Years</span>
+                                        </label>
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" name="crash-year" value="2020"> <span>2020</span>
+                                        </label>
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" name="crash-year" value="2021"> <span>2021</span>
+                                        </label>
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" name="crash-year" value="2022"> <span>2022</span>
+                                        </label>
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" name="crash-year" value="2023"> <span>2023</span>
+                                        </label>
+                                        <label class="checkbox-container">
+                                            <input type="checkbox" name="crash-year" value="2024"> <span>2024</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="layer-toggles">
+                            <label class="toggle-container">
+                                <input type="checkbox" id="toggle-heatmap" class="layer-toggle-checkbox">
+                                <span class="toggle-label">Show Heatmap</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 
@@ -114,8 +121,8 @@
                     
                     <div class="tab-container">
                         <div class="tab-header">
-                            <button class="tab-button active" data-tab="stats">Statistics</button>
-                            <button class="tab-button" data-tab="clusters">Hotspots</button>
+                            <button class="tab-button active" data-tab="stats">Overview</button>
+                            <button class="tab-button" data-tab="clusters">High-density Areas</button>
                         </div>
                         
                         <div class="tab-content">

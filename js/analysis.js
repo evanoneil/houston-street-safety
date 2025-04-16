@@ -234,10 +234,10 @@ class AnalysisHandler {
             let hotspotsHTML = '';
             
             if (hotspots.length === 0) {
-                hotspotsHTML = '<p class="placeholder-text">No significant hotspots found with current filters</p>';
+                hotspotsHTML = '<p class="placeholder-text">No significant high-density areas found with current filters</p>';
             } else {
                 hotspotsHTML = `
-                    <p>Found ${hotspots.length} hotspots with crash points</p>
+                    <p>Found ${hotspots.length} high-density areas with crash points</p>
                     <div class="hotspots-list">
                 `;
                 
@@ -259,7 +259,7 @@ class AnalysisHandler {
                     // Create hotspot item HTML with improved styling
                     hotspotsHTML += `
                         <div class="hotspot-item" data-lng="${hotspot.center[0]}" data-lat="${hotspot.center[1]}" data-hotspot='${hotspotData}'>
-                            <h4>Hotspot #${index + 1}: ${hotspot.points.length} crashes</h4>
+                            <h4>High-density Area #${index + 1}: ${hotspot.points.length} crashes</h4>
                             <div class="hotspot-content">
                                 <div class="crash-severity-breakdown">
                                     <p><strong>Severity:</strong></p>
@@ -343,7 +343,7 @@ class AnalysisHandler {
 
     // Find hotspots using a grid-based density analysis
     findHotspots(data, cellSizeKm = 0.5) {
-        if (data.length < 5) return []; // Not enough data for valid hotspots
+        if (data.length < 8) return []; // Not enough data for valid hotspots
         
         // Create a grid to store point counts
         const grid = {};
@@ -379,7 +379,7 @@ class AnalysisHandler {
         // Filter and calculate grid cell densities
         for (const cellKey in grid) {
             const cell = grid[cellKey];
-            if (cell.points.length >= 3) { // Only consider cells with multiple crashes
+            if (cell.points.length >= 4) { // Only consider cells with at least 4 crashes
                 const areaSqKm = this.calculateAreaSqKm(cell.bounds);
                 const density = cell.points.length / areaSqKm;
                 

@@ -1202,4 +1202,51 @@ table th {
 .help-icon {
     margin-top: 20px;
     opacity: 0.6;
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-bottom: 0.75rem;
+    color: #2c3e50;
+    user-select: none;
+}
+
+.filter-toggle {
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.filter-toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+.filter-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.filter-content.collapsed {
+    max-height: 0;
+    transition: max-height 0.3s ease;
+}
+
+.filter-toggle.collapsed .filter-toggle-icon {
+    transform: rotate(-90deg);
 } 

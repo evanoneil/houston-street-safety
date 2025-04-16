@@ -476,7 +476,7 @@ class HotspotOverviewHandler {
     
     // Find hotspots using a grid-based density analysis
     findHotspots(data, radiusKm = 0.3) {
-        if (data.length < 3) return []; // Not enough data for valid hotspots
+        if (data.length < 4) return []; // Not enough data for valid hotspots
         
         const hotspots = [];
         let hotspotId = 1;
@@ -500,7 +500,7 @@ class HotspotOverviewHandler {
             });
             
             // If there are enough neighbors, create a hotspot
-            if (neighbors.length >= 2) { // At least 3 points total (current + 2 neighbors)
+            if (neighbors.length >= 3) { // At least 4 points total (current + 3 neighbors)
                 const hotspotPoints = [point, ...neighbors];
                 
                 // Mark points as part of a hotspot
