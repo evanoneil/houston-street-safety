@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harris County Pedestrian & Cyclist Crash Map</title>
+    
+    <!-- Google Fonts - Public Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Mapbox GL JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="sidebar-toggle" id="sidebar-close">
+                    <span>&times;</span>
+                </div>
+                <div class="sidebar-header">
+                    <h1>Harris County Pedestrian & Cyclist Crash Map</h1>
+                    <p class="header-subtitle">Data from TxDOT (2020-Present)</p>
+                    <p class="header-data-source">Data Source: <a href="https://cris.dot.state.tx.us" target="_blank">C.R.I.S. by TxDOT</a></p>
+                </div>
+                
+                <div class="control-panel">
+                    <h2>Filters</h2>
+                    <div class="filter-group">
+                        <label class="filter-group-label">Crash Type:</label>
+                        <div class="dropdown-filter">
+                            <button class="dropdown-toggle">Select Crash Types</button>
+                            <div class="dropdown-content">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="crash-type" value="all" checked> <span>All Crashes</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="crash-type" value="pedestrian"> <span>Pedestrian Only</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="crash-type" value="cyclist"> <span>Cyclist Only</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-group-label">Severity:</label>
+                        <div class="dropdown-filter">
+                            <button class="dropdown-toggle">Select Severity</button>
+                            <div class="dropdown-content">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="crash-severity" value="all" checked> <span>All Severities</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="crash-severity" value="K"> <span>K - Fatal</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="crash-severity" value="A"> <span>A - Suspected Serious</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="crash-severity" value="B"> <span>B - Suspected Minor</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="crash-severity" value="C"> <span>C - Possible Injury</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label class="filter-group-label">Year:</label>
+                        <div class="dropdown-filter">
+                            <button class="dropdown-toggle">Select Years</button>
+                            <div class="dropdown-content">
+                                <div id="year-checkbox-group">
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-year" value="all" checked> <span>All Years</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-year" value="2020"> <span>2020</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-year" value="2021"> <span>2021</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-year" value="2022"> <span>2022</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-year" value="2023"> <span>2023</span>
+                                    </label>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" name="crash-year" value="2024"> <span>2024</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="layer-toggles">
+                        <label class="toggle-container">
+                            <input type="checkbox" id="toggle-heatmap" class="layer-toggle-checkbox">
+                            <span class="toggle-label">Show Heatmap</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="analysis-panel">
+                    <h2>Analysis</h2>
+                    
+                    <div class="tab-container">
+                        <div class="tab-header">
+                            <button class="tab-button active" data-tab="stats">Statistics</button>
+                            <button class="tab-button" data-tab="clusters">Hotspots</button>
+                        </div>
+                        
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="stats-content">
+                                <p class="placeholder-text">Select filters to see statistics</p>
+                            </div>
+                            
+                            <div class="tab-pane" id="clusters-content">
+                                <p class="placeholder-text">Select filters to see hotspot analysis</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <main class="map-container">
+                <div id="map"></div>
+                <div class="sidebar-show-btn" id="sidebar-show">
+                    <span>&#9776;</span>
+                </div>
+                <div class="map-credits">
+                    <a href="https://evanoneil.studio" target="_blank">Built by DS_o_EO</a>
+                </div>
+                <div class="legend">
+                    <h3>Crash Severity</h3>
+                    <div class="legend-item">
+                        <span class="legend-color fatal"></span>
+                        <span class="legend-label">K - Fatal</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color serious"></span>
+                        <span class="legend-label">A - Suspected Serious</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color minor"></span>
+                        <span class="legend-label">B - Suspected Minor</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color possible"></span>
+                        <span class="legend-label">C - Possible Injury</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/dataProcessor.js"></script>
+    <script src="js/analysis.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/hotspotOverview.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html> 
