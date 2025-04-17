@@ -254,18 +254,23 @@ class HotspotOverviewHandler {
         // Get common street names without any speed limit numbers
         const streets = this.getCommonStreets(hotspot.points);
         
-        // Clean street names to remove any numbers at the end (which are typically speed limits)
-        const cleanStreetNames = streets.map(street => {
-            // Remove any numbers at the end of the street name
-            return street.replace(/\s+\d+$/, '');
-        });
+        // Filter out any remaining numeric-only items that might be speed limits
+        const cleanStreetNames = streets.filter(street => 
+            // Filter out anything that's just numbers or looks like a speed limit
+            !/^\d+$/.test(street) && 
+            !/^Speed Limit \d+$/.test(street)
+        );
         
-        const location = cleanStreetNames.length > 0 ? cleanStreetNames.join(' & ') : 'Unknown Area';
+        let location = 'Unknown Area';
+        if (cleanStreetNames.length > 0) {
+            location = cleanStreetNames.join(' & ');
+        }
         
         // Calculate statistics
         const severityCounts = this.getSeverityCounts(hotspot.points);
         const typeCounts = this.getTypeCounts(hotspot.points);
         const yearCounts = this.getYearCounts(hotspot.points);
+        const speedLimitCounts = this.getSpeedLimitCounts(hotspot.points);
         
         // Populate stats section - with no street speed limits at the top
         statsElement.innerHTML = `
@@ -285,159 +290,279 @@ class HotspotOverviewHandler {
             </div>
         `;
         
-        // Populate charts section (we'll use simple div-based charts for this example)
-        let chartHTML = '<h4>Crash Analysis</h4>';
+        // Charts and detailed info
+        let chartsHTML = `
+            <div class="hotspot-location">
+                <h4>Location</h4>
+                <p>${location}</p>
+            </div>
+            
+            <div class="chart-container">
+                <h5>Severity Breakdown</h5>
+                <div class="bar-chart">
+        `;
         
-        // Severity distribution
-        chartHTML += '<div class="chart-container"><h5>Severity</h5><div class="bar-chart">';
+        // Get the maximum count for scaling
+        const maxSeverityCount = Math.max(
+            severityCounts.K || 0,
+            severityCounts.A || 0,
+            severityCounts.B || 0,
+            severityCounts.C || 0
+        );
         
-        if (severityCounts.K > 0) {
-            const kPercentage = (severityCounts.K / hotspot.points.length * 100).toFixed(1);
-            chartHTML += `
-                <div class="chart-bar">
-                    <div class="chart-label">Fatal</div>
-                    <div class="chart-bar-container">
-                        <div class="chart-bar-fill fatal" style="width: ${kPercentage}%"></div>
+        const severities = [
+            { code: 'K', label: 'Fatal' },
+            { code: 'A', label: 'Suspected Serious' },
+            { code: 'B', label: 'Suspected Minor' },
+            { code: 'C', label: 'Possible Injury' }
+        ];
+        
+        severities.forEach(severity => {
+            const count = severityCounts[severity.code] || 0;
+            if (count > 0) {
+                const barWidth = maxSeverityCount > 0 ? (count / maxSeverityCount * 100) : 0;
+                
+                let fillClass = '';
+                switch(severity.code) {
+                    case 'K': fillClass = 'fatal'; break;
+                    case 'A': fillClass = 'serious'; break;
+                    case 'B': fillClass = 'minor'; break;
+                    case 'C': fillClass = 'possible'; break;
+                }
+                
+                chartsHTML += `
+                    <div class="chart-bar">
+                        <div class="chart-label">${severity.label}</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill ${fillClass}" style="width: ${barWidth}%"></div>
+                        </div>
+                        <div class="chart-value">${count}</div>
                     </div>
-                    <div class="chart-value">${severityCounts.K} (${kPercentage}%)</div>
+                `;
+            }
+        });
+        
+        chartsHTML += `
+                </div>
+            </div>
+        `;
+        
+        // Add speed limit breakdown
+        if (Object.keys(speedLimitCounts).length > 0) {
+            chartsHTML += `
+                <div class="chart-container">
+                    <h5>Speed Limits</h5>
+                    <p class="chart-description">Posted speed limits where crashes occurred</p>
+                    <div class="bar-chart">
+            `;
+            
+            // Get the maximum count for scaling
+            const maxSpeedLimitCount = Math.max(...Object.values(speedLimitCounts));
+            
+            // Define speed limit groups with colors
+            const speedLimits = [
+                { range: '0-25', label: '0-25 mph', class: 'speed-low' },
+                { range: '30-35', label: '30-35 mph', class: 'speed-medium' },
+                { range: '40-45', label: '40-45 mph', class: 'speed-high' },
+                { range: '50+', label: '50+ mph', class: 'speed-very-high' },
+                { range: 'Unknown', label: 'Unknown', class: 'speed-unknown' }
+            ];
+            
+            speedLimits.forEach(speedLimit => {
+                const count = speedLimitCounts[speedLimit.range] || 0;
+                if (count > 0) {
+                    const barWidth = maxSpeedLimitCount > 0 ? (count / maxSpeedLimitCount * 100) : 0;
+                    
+                    chartsHTML += `
+                        <div class="chart-bar">
+                            <div class="chart-label">${speedLimit.label}</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill ${speedLimit.class}" style="width: ${barWidth}%"></div>
+                            </div>
+                            <div class="chart-value">${count}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            chartsHTML += `
+                    </div>
+                </div>
+            `;
+            
+            // If there are fatalities, show a fatality rate by speed limit chart
+            const fatalCrashes = severityCounts.K || 0;
+            if (fatalCrashes > 0) {
+                chartsHTML += `
+                    <div class="chart-container">
+                        <h5>Fatalities by Speed Limit</h5>
+                        <p class="chart-description">Fatal crashes by speed limit</p>
+                        <div class="fatality-chart">
+                `;
+                
+                // Calculate fatalities by speed limit
+                const fatalitiesBySpeed = {};
+                let maxFatalityCount = 0;
+                
+                // Count fatal crashes by speed limit
+                hotspot.points.filter(p => p.severity === 'K').forEach(crash => {
+                    const speedRange = this.getSpeedLimitRange(crash.speedLimit);
+                    fatalitiesBySpeed[speedRange] = (fatalitiesBySpeed[speedRange] || 0) + 1;
+                    maxFatalityCount = Math.max(maxFatalityCount, fatalitiesBySpeed[speedRange]);
+                });
+                
+                speedLimits.forEach(speedLimit => {
+                    const count = fatalitiesBySpeed[speedLimit.range] || 0;
+                    if (count > 0) {
+                        const barWidth = maxFatalityCount > 0 ? (count / maxFatalityCount * 100) : 0;
+                        
+                        chartsHTML += `
+                            <div class="chart-bar">
+                                <div class="chart-label">${speedLimit.label}</div>
+                                <div class="chart-bar-container">
+                                    <div class="chart-bar-fill ${speedLimit.class}" style="width: ${barWidth}%"></div>
+                                </div>
+                                <div class="chart-value">${count}</div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                chartsHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Add type breakdown if we have different types
+        if (typeCounts.pedestrian > 0 && typeCounts.cyclist > 0) {
+            const maxTypeCount = Math.max(typeCounts.pedestrian, typeCounts.cyclist);
+            
+            chartsHTML += `
+                <div class="chart-container">
+                    <h5>Crash Type</h5>
+                    <div class="bar-chart">
+                        <div class="chart-bar">
+                            <div class="chart-label">Pedestrian</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill pedestrian" style="width: ${(typeCounts.pedestrian / maxTypeCount) * 100}%"></div>
+                            </div>
+                            <div class="chart-value">${typeCounts.pedestrian}</div>
+                        </div>
+                        <div class="chart-bar">
+                            <div class="chart-label">Cyclist</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill cyclist" style="width: ${(typeCounts.cyclist / maxTypeCount) * 100}%"></div>
+                            </div>
+                            <div class="chart-value">${typeCounts.cyclist}</div>
+                        </div>
+                    </div>
                 </div>
             `;
         }
         
-        if (severityCounts.A > 0) {
-            const aPercentage = (severityCounts.A / hotspot.points.length * 100).toFixed(1);
-            chartHTML += `
-                <div class="chart-bar">
-                    <div class="chart-label">Serious</div>
-                    <div class="chart-bar-container">
-                        <div class="chart-bar-fill serious" style="width: ${aPercentage}%"></div>
+        // Year breakdown
+        const years = Object.keys(yearCounts).sort();
+        if (years.length > 1) {
+            const maxYearCount = Math.max(...Object.values(yearCounts));
+            
+            chartsHTML += `
+                <div class="chart-container">
+                    <h5>Year Breakdown</h5>
+                    <div class="bar-chart">
+            `;
+            
+            years.forEach(year => {
+                const count = yearCounts[year];
+                if (count > 0) {
+                    const barWidth = maxYearCount > 0 ? (count / maxYearCount * 100) : 0;
+                    
+                    chartsHTML += `
+                        <div class="chart-bar">
+                            <div class="chart-label">${year}</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill" style="width: ${barWidth}%; background-color: #6c757d;"></div>
+                            </div>
+                            <div class="chart-value">${count}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            chartsHTML += `
                     </div>
-                    <div class="chart-value">${severityCounts.A} (${aPercentage}%)</div>
                 </div>
             `;
         }
         
-        if (severityCounts.B > 0) {
-            const bPercentage = (severityCounts.B / hotspot.points.length * 100).toFixed(1);
-            chartHTML += `
-                <div class="chart-bar">
-                    <div class="chart-label">Minor</div>
-                    <div class="chart-bar-container">
-                        <div class="chart-bar-fill minor" style="width: ${bPercentage}%"></div>
-                    </div>
-                    <div class="chart-value">${severityCounts.B} (${bPercentage}%)</div>
-                </div>
-            `;
-        }
+        chartsElement.innerHTML = chartsHTML;
         
-        if (severityCounts.C > 0) {
-            const cPercentage = (severityCounts.C / hotspot.points.length * 100).toFixed(1);
-            chartHTML += `
-                <div class="chart-bar">
-                    <div class="chart-label">Possible</div>
-                    <div class="chart-bar-container">
-                        <div class="chart-bar-fill possible" style="width: ${cPercentage}%"></div>
-                    </div>
-                    <div class="chart-value">${severityCounts.C} (${cPercentage}%)</div>
-                </div>
-            `;
-        }
+        // Populate crash list with details of each crash
+        let crashListHTML = `
+            <h4>Individual Crashes (${hotspot.points.length})</h4>
+            <div class="crash-list">
+        `;
         
-        chartHTML += '</div></div>';
-        
-        // Crash type distribution
-        chartHTML += '<div class="chart-container"><h5>Crash Type</h5><div class="bar-chart">';
-        
-        if (typeCounts.pedestrian > 0) {
-            const pedPercentage = (typeCounts.pedestrian / hotspot.points.length * 100).toFixed(1);
-            chartHTML += `
-                <div class="chart-bar">
-                    <div class="chart-label">Pedestrian</div>
-                    <div class="chart-bar-container">
-                        <div class="chart-bar-fill pedestrian" style="width: ${pedPercentage}%"></div>
-                    </div>
-                    <div class="chart-value">${typeCounts.pedestrian} (${pedPercentage}%)</div>
-                </div>
-            `;
-        }
-        
-        if (typeCounts.cyclist > 0) {
-            const cycPercentage = (typeCounts.cyclist / hotspot.points.length * 100).toFixed(1);
-            chartHTML += `
-                <div class="chart-bar">
-                    <div class="chart-label">Cyclist</div>
-                    <div class="chart-bar-container">
-                        <div class="chart-bar-fill cyclist" style="width: ${cycPercentage}%"></div>
-                    </div>
-                    <div class="chart-value">${typeCounts.cyclist} (${cycPercentage}%)</div>
-                </div>
-            `;
-        }
-        
-        chartHTML += '</div></div>';
-        
-        chartsElement.innerHTML = chartHTML;
-        
-        // Populate crash list section
-        let crashListHTML = '<h4>All Crashes</h4><div class="crash-list">';
-        
-        // Sort crashes by date (most recent first)
+        // Sort crashes by severity and date (most severe and recent first)
         const sortedCrashes = [...hotspot.points].sort((a, b) => {
+            // First sort by severity (K > A > B > C)
+            const severityOrder = { 'K': 0, 'A': 1, 'B': 2, 'C': 3, 'U': 4 };
+            const severityDiff = severityOrder[a.severity] - severityOrder[b.severity];
+            
+            if (severityDiff !== 0) return severityDiff;
+            
+            // Then sort by date (most recent first)
             return new Date(b.date) - new Date(a.date);
         });
         
-        // Show all crashes instead of just the 5 most recent
         sortedCrashes.forEach(crash => {
             // Debug crash data
-            console.log('Crash data for debugging:', JSON.stringify(crash));
             
-            let severityClass = '';
+            // Get severity text and class
             let severityText = '';
+            let severityClass = '';
             
-            switch (crash.severity) {
-                case 'K': 
-                    severityClass = 'fatal';
+            switch(crash.severity) {
+                case 'K':
                     severityText = 'Fatal';
+                    severityClass = 'fatal';
                     break;
-                case 'A': 
-                    severityClass = 'serious';
+                case 'A':
                     severityText = 'Serious';
+                    severityClass = 'serious';
                     break;
-                case 'B': 
-                    severityClass = 'minor';
+                case 'B':
                     severityText = 'Minor';
+                    severityClass = 'minor';
                     break;
-                case 'C': 
-                    severityClass = 'possible';
+                case 'C':
                     severityText = 'Possible';
+                    severityClass = 'possible';
                     break;
+                default:
+                    severityText = 'Unknown';
+                    severityClass = '';
             }
             
-            // Format time for display
-            let timeDisplay = 'Unknown time';
-            if (crash.time) {
-                // Format time based on length (e.g., 1430 becomes 2:30 PM)
-                if (crash.time.length === 4) {
-                    const hours = parseInt(crash.time.substring(0, 2));
-                    const minutes = crash.time.substring(2, 4);
-                    const period = hours >= 12 ? 'PM' : 'AM';
-                    const displayHours = hours % 12 || 12;
-                    timeDisplay = `${displayHours}:${minutes} ${period}`;
-                } else {
-                    timeDisplay = crash.time;
+            // Format the time
+            let timeDisplay = crash.time || '';
+            if (timeDisplay) {
+                // Convert 24-hour time to 12-hour format with AM/PM
+                const timeParts = timeDisplay.split(':');
+                if (timeParts.length >= 2) {
+                    const hour = parseInt(timeParts[0]);
+                    const minute = timeParts[1];
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    const hour12 = hour % 12 || 12; // Convert 0 to 12 for 12 AM
+                    timeDisplay = `${hour12}:${minute} ${ampm}`;
                 }
             }
             
-            // Get the street name without the speed limit number
-            const streetName = crash.streetName ? crash.streetName.replace(/\s+\d+$/, '') : 'Unknown Location';
-            
-            // Extract speed limit from street name directly
+            // Get speed limit text
             let speedLimitText = '';
-            if (crash.streetName) {
-                const match = crash.streetName.match(/\s+(\d+)$/);
-                if (match && match[1]) {
-                    speedLimitText = `<span class="crash-speed-limit">Speed limit: ${match[1]}</span>`;
-                }
+            if (crash.speedLimit) {
+                speedLimitText = `<span class="crash-speed-limit">Speed limit: ${crash.speedLimit} mph</span>`;
             }
             
             // Format conditions for display - use only the conditions we want
@@ -469,8 +594,9 @@ class HotspotOverviewHandler {
             `;
         });
         
-        crashListHTML += '</div>';
+        crashListHTML += `</div>`;
         
+        // Update the crash list element
         crashListElement.innerHTML = crashListHTML;
     }
     
@@ -576,23 +702,22 @@ class HotspotOverviewHandler {
         return R * c;
     }
     
-    // Get common street names from a list of points
+    // Get common streets in a hotspot
     getCommonStreets(points) {
         const streetCounts = {};
         
-        points.forEach(point => {
-            if (point.streetName && point.streetName !== 'Unknown') {
-                if (!streetCounts[point.streetName]) {
-                    streetCounts[point.streetName] = 0;
-                }
-                streetCounts[point.streetName]++;
+        points.forEach(p => {
+            // Only use the clean street name without speed limits
+            const street = p.streetName || 'Unknown';
+            if (street !== 'Unknown') {
+                streetCounts[street] = (streetCounts[street] || 0) + 1;
             }
         });
         
-        // Get the top 2 most common streets
+        // Get top 3 most common streets
         return Object.entries(streetCounts)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 2)
+            .slice(0, 3)
             .map(entry => entry[0]);
     }
     
@@ -728,6 +853,49 @@ class HotspotOverviewHandler {
                 </div>
             `;
         }
+    }
+
+    // Get speed limit counts grouped into ranges
+    getSpeedLimitCounts(points) {
+        const counts = {
+            '0-25': 0,
+            '30-35': 0,
+            '40-45': 0,
+            '50+': 0,
+            'Unknown': 0
+        };
+        
+        points.forEach(point => {
+            if (point.speedLimit === null) {
+                counts['Unknown']++;
+            } else if (point.speedLimit <= 25) {
+                counts['0-25']++;
+            } else if (point.speedLimit >= 30 && point.speedLimit <= 35) {
+                counts['30-35']++;
+            } else if (point.speedLimit >= 40 && point.speedLimit <= 45) {
+                counts['40-45']++;
+            } else if (point.speedLimit >= 50) {
+                counts['50+']++;
+            }
+        });
+        
+        return counts;
+    }
+
+    // Helper method to determine speed limit range
+    getSpeedLimitRange(speedLimit) {
+        if (speedLimit === null) {
+            return 'Unknown';
+        } else if (speedLimit <= 25) {
+            return '0-25';
+        } else if (speedLimit >= 30 && speedLimit <= 35) {
+            return '30-35';
+        } else if (speedLimit >= 40 && speedLimit <= 45) {
+            return '40-45';
+        } else if (speedLimit >= 50) {
+            return '50+';
+        }
+        return 'Unknown';
     }
 }
 
