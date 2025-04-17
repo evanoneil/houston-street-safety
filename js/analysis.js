@@ -403,11 +403,117 @@ class AnalysisHandler {
                             <p>of all crashes</p>
                         </div>
                     </div>
+                    <div class="speed-related-actions">
+                        <button id="filter-speed-crashes" class="speed-filter-btn">Show only speed-related crashes</button>
+                        <button id="reset-speed-filter" class="speed-filter-btn reset" style="display: none;">Show all crashes</button>
+                    </div>
                 </div>
             </div>
         `;
         
         element.innerHTML = speedLimitHTML;
+        
+        // Add event listeners to speed filter buttons
+        const filterSpeedBtn = document.getElementById('filter-speed-crashes');
+        const resetSpeedBtn = document.getElementById('reset-speed-filter');
+        
+        if (filterSpeedBtn) {
+            filterSpeedBtn.addEventListener('click', () => {
+                this.filterSpeedRelatedCrashes();
+                filterSpeedBtn.style.display = 'none';
+                resetSpeedBtn.style.display = 'block';
+            });
+        }
+        
+        if (resetSpeedBtn) {
+            resetSpeedBtn.addEventListener('click', () => {
+                this.resetSpeedFilter();
+                resetSpeedBtn.style.display = 'none';
+                filterSpeedBtn.style.display = 'block';
+            });
+        }
+    }
+    
+    // Filter map to show only speed-related crashes
+    filterSpeedRelatedCrashes() {
+        // Get current filter values
+        const typeFilter = this.currentType;
+        const severityFilter = this.currentSeverity;
+        const yearFilter = this.currentYear;
+        
+        // Get filtered data
+        const filteredData = dataProcessor.getFilteredData(typeFilter, severityFilter, yearFilter);
+        
+        // Filter for speed-related crashes only
+        const speedRelatedData = filteredData.filter(d => {
+            if (!d.factors) return false;
+            const factorsLower = d.factors.toLowerCase();
+            return factorsLower.includes('speed') || 
+                   factorsLower.includes('speeding') || 
+                   factorsLower.includes('unsafe speed') ||
+                   factorsLower.includes('over the limit');
+        });
+        
+        // Convert to GeoJSON for map display
+        const features = speedRelatedData.map(d => {
+            return {
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: d.coordinates
+                },
+                properties: {
+                    ...d.properties,
+                    id: d.id,
+                    type: d.type,
+                    severity: d.severity
+                }
+            };
+        });
+        
+        const geoJSON = {
+            type: 'FeatureCollection',
+            features
+        };
+        
+        // Update map with filtered data
+        mapHandler.updateMapData(geoJSON);
+        
+        // Add active filter indicator
+        const filterIndicator = document.createElement('div');
+        filterIndicator.id = 'speed-filter-indicator';
+        filterIndicator.className = 'speed-filter-indicator';
+        filterIndicator.innerHTML = `<p>Showing ${speedRelatedData.length} speed-related crashes</p>`;
+        
+        const existingIndicator = document.getElementById('speed-filter-indicator');
+        if (existingIndicator) {
+            existingIndicator.remove();
+        }
+        
+        const speedLimitTab = document.getElementById('speed-limit-content');
+        if (speedLimitTab) {
+            speedLimitTab.prepend(filterIndicator);
+        }
+    }
+    
+    // Reset filter to show all crashes
+    resetSpeedFilter() {
+        // Get current filter values
+        const typeFilter = this.currentType;
+        const severityFilter = this.currentSeverity;
+        const yearFilter = this.currentYear;
+        
+        // Get GeoJSON for all data with current filters
+        const geoJSON = dataProcessor.getGeoJSON(typeFilter, severityFilter, yearFilter);
+        
+        // Update map with all data
+        mapHandler.updateMapData(geoJSON);
+        
+        // Remove active filter indicator
+        const filterIndicator = document.getElementById('speed-filter-indicator');
+        if (filterIndicator) {
+            filterIndicator.remove();
+        }
     }
 
     // Update hotspot analysis

@@ -1380,4 +1380,47 @@ table th {
     font-size: 0.9rem;
     margin: 0;
     color: #495057;
+}
+
+.speed-related-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.speed-filter-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.speed-filter-btn:hover {
+    background-color: #c82333;
+}
+
+.speed-filter-btn.reset {
+    background-color: #6c757d;
+}
+
+.speed-filter-btn.reset:hover {
+    background-color: #5a6268;
+}
+
+.speed-filter-indicator {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.speed-filter-indicator p {
+    margin: 0;
 } 
