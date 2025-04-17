@@ -480,19 +480,19 @@ h2 {
 }
 
 .legend-color.fatal {
-    background-color: #333333; /* Fatality - dark gray/black */
+    background-color: #212121; /* Fatality - darker black */
 }
 
 .legend-color.serious {
-    background-color: #e45d51; /* Collision - red-orange */
+    background-color: #d9404a; /* Serious - more red than orange */
 }
 
 .legend-color.minor {
-    background-color: #ef9b4f; /* Near Miss - orange */
+    background-color: #f18f2c; /* Minor - more orange */
 }
 
 .legend-color.possible {
-    background-color: #f8cb50; /* Hazard - yellow */
+    background-color: #ffd966; /* Possible - more saturated yellow */
 }
 
 .legend-label {
@@ -539,46 +539,46 @@ h2 {
 
 /* Severity-based header colors */
 .popup-header.k {
-    background-color: #333333; /* Fatal */
+    background-color: #212121; /* Fatal */
 }
 
 .popup-header.a {
-    background-color: #e45d51; /* Serious */
+    background-color: #d9404a; /* Serious */
 }
 
 .popup-header.b {
-    background-color: #ef9b4f; /* Minor */
+    background-color: #f18f2c; /* Minor */
 }
 
 .popup-header.c {
-    background-color: #f8cb50; /* Possible */
+    background-color: #ffd966; /* Possible */
     color: #333; /* Darker text for better contrast on yellow */
 }
 
 /* Also style the h4 headers in the sidebar with the same colors */
 h4.k {
-    background-color: #333333;
+    background-color: #212121;
     color: white;
     padding: 8px 12px;
     border-radius: 4px;
 }
 
 h4.a {
-    background-color: #e45d51;
+    background-color: #d9404a;
     color: white;
     padding: 8px 12px;
     border-radius: 4px;
 }
 
 h4.b {
-    background-color: #ef9b4f;
+    background-color: #f18f2c;
     color: white;
     padding: 8px 12px;
     border-radius: 4px;
 }
 
 h4.c {
-    background-color: #f8cb50;
+    background-color: #ffd966;
     color: #333;
     padding: 8px 12px;
     border-radius: 4px;
@@ -945,19 +945,19 @@ table th {
 }
 
 .chart-bar-fill.fatal {
-    background-color: #333333;
+    background-color: #212121;
 }
 
 .chart-bar-fill.serious {
-    background-color: #e45d51;
+    background-color: #d9404a;
 }
 
 .chart-bar-fill.minor {
-    background-color: #ef9b4f;
+    background-color: #f18f2c;
 }
 
 .chart-bar-fill.possible {
-    background-color: #f8cb50;
+    background-color: #ffd966;
 }
 
 .chart-bar-fill.pedestrian {
@@ -1042,19 +1042,19 @@ table th {
 }
 
 .crash-severity.fatal {
-    background-color: #333333;
+    background-color: #212121;
 }
 
 .crash-severity.serious {
-    background-color: #e45d51;
+    background-color: #d9404a;
 }
 
 .crash-severity.minor {
-    background-color: #ef9b4f;
+    background-color: #f18f2c;
 }
 
 .crash-severity.possible {
-    background-color: #f8cb50;
+    background-color: #ffd966;
     color: #333;
 }
 

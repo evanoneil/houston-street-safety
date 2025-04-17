@@ -35,12 +35,12 @@ const config = {
         ]
     },
     
-    // Updated colors to match the legend in the image
+    // Updated colors for better distinction between severity levels
     severityColors: {
-        'C': '#f8cb50', // Hazard - yellow
-        'B': '#ef9b4f', // Near Miss - orange
-        'A': '#e45d51', // Collision - red-orange
-        'K': '#333333'  // Fatality - dark gray/black
+        'C': '#ffd966', // Possible - more saturated yellow
+        'B': '#f18f2c', // Minor - more orange
+        'A': '#d9404a', // Serious - more red than orange
+        'K': '#212121'  // Fatality - darker black
     },
     
     // Icon sizes based on zoom level
