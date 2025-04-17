@@ -371,9 +371,9 @@ class MapHandler {
         if (properties.intersectionDetails) {
             conditionsHTML += `<span class="crash-intersection">${properties.intersectionDetails}</span>`;
         }
-        if (properties.weather) {
-            conditionsHTML += `<span class="crash-weather">${properties.weather}</span>`;
-        }
+        // if (properties.weather) {
+        //     conditionsHTML += `<span class="crash-weather">${properties.weather}</span>`;
+        // }
         
         let popupContent = `
             <div class="popup-container">

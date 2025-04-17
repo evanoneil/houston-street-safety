@@ -168,7 +168,7 @@ function updateDropdownLabel(name, defaultText) {
     if (Array.from(checkboxes).some(cb => cb.value === 'all')) {
         if (name === 'crash-type') toggle.textContent = 'All Crashes';
         else if (name === 'crash-severity') toggle.textContent = 'All Severities';
-        else if (name === 'crash-year') toggle.textContent = 'All Years';
+        else if (name === 'crash-year') toggle.textContent = 'All Years (2020-2025)';
         return;
     }
     

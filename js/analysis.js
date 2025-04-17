@@ -12,15 +12,15 @@ class AnalysisHandler {
         this.currentSeverity = severity;
         this.currentYear = year;
         
-        // Update statistics
-        this.updateStatistics();
+        // Update overview
+        this.updateOverview();
         
         // Update hotspot analysis
         this.updateHotspots();
     }
 
-    // Update statistics in the UI
-    updateStatistics() {
+    // Update overview in the UI
+    updateOverview() {
         const stats = dataProcessor.getStatistics(this.currentType, this.currentSeverity, this.currentYear);
         const statsElement = document.getElementById('stats-content');
         
@@ -75,7 +75,7 @@ class AnalysisHandler {
             // Year filter info with improved formatting
             filterInfoHTML += '<p><strong>Year:</strong> ';
             if (this.currentYear === 'all') {
-                filterInfoHTML += '<span class="filter-value">All Years</span>';
+                filterInfoHTML += '<span class="filter-value">All Years (2020-2025)</span>';
             } else if (Array.isArray(this.currentYear)) {
                 const yearLabels = this.currentYear.map(y => 
                     `<span class="filter-value">${y}</span>`
@@ -494,3 +494,16 @@ class AnalysisHandler {
 
 // Create instance
 const analysisHandler = new AnalysisHandler(); 
+
+function updateOverview() {
+    // Update the overview in the UI
+    const stats = document.getElementById('stats-content');
+    const activeFilters = getActiveFilters();
+    
+    if (activeFilters.length === 0) {
+        stats.innerHTML = '<p class="placeholder-text">Select filters to see overview</p>';
+        return;
+    }
+    
+    // ... existing code ...
+} 

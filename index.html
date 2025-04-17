@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harris County Pedestrian & Cyclist Crash Map</title>
+    <title>Houston-area Street Safety Map</title>
     
     <!-- Google Fonts - Public Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -23,8 +23,11 @@
                     <span>&times;</span>
                 </div>
                 <div class="sidebar-header">
-                    <h1>Harris County Pedestrian & Cyclist Crash Map</h1>
-                    <p class="header-subtitle">Data from TxDOT (2020-Present)</p>
+                    <h1>
+                        <span class="title-line">Houston-Area</span>
+                        <span class="title-line">Street Safety Map</span>
+                    </h1>
+                    <p class="header-subtitle">Data from crashes involving cyclists and pedestrians (2020-present)</p>
                     <p class="header-data-source">Data Source: <a href="https://cris.dot.state.tx.us" target="_blank">C.R.I.S. by TxDOT</a></p>
                 </div>
                 
@@ -85,7 +88,7 @@
                                 <div class="dropdown-content">
                                     <div id="year-checkbox-group">
                                         <label class="checkbox-container">
-                                            <input type="checkbox" name="crash-year" value="all" checked> <span>All Years</span>
+                                            <input type="checkbox" name="crash-year" value="all" checked> <span>All Years (2020-2025)</span>
                                         </label>
                                         <label class="checkbox-container">
                                             <input type="checkbox" name="crash-year" value="2020"> <span>2020</span>
@@ -127,7 +130,7 @@
                         
                         <div class="tab-content">
                             <div class="tab-pane active" id="stats-content">
-                                <p class="placeholder-text">Select filters to see statistics</p>
+                                <p class="placeholder-text">Select filters to see overview</p>
                             </div>
                             
                             <div class="tab-pane" id="clusters-content">
@@ -146,6 +149,7 @@
                 <div class="map-credits">
                     <a href="https://evanoneil.studio" target="_blank">Built by DS_o_EO</a>
                 </div>
+                <a href="https://beautifullyelevated.substack.com" target="_blank" class="subscribe-btn">Subscribe to Beautifully Elevated</a>
                 <div class="legend">
                     <h3>Crash Severity</h3>
                     <div class="legend-item">
