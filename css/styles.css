@@ -455,7 +455,9 @@ h2 {
     border-radius: 4px;
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
     font-size: 0.8rem;
-    z-index: 1;
+    z-index: 5;
+    width: auto;
+    max-width: 200px;
 }
 
 .legend h3 {
@@ -699,15 +701,30 @@ table th {
     }
     
     .sidebar {
-        width: 100%;
-        height: 40%;
-        border-top: 1px solid #dee2e6;
-        border-right: none;
+        width: 85%;
+        height: 100%;
+        max-height: none;
+        border-top: none;
+        border-right: 1px solid #dee2e6;
+        left: 0;
+        top: 0;
+        border-radius: 0;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .sidebar-header {
+        border-radius: 0;
+    }
+    
+    .sidebar.hidden {
+        transform: translateX(-100%);
     }
     
     .legend {
-        left: 20px;
-        right: auto;
+        left: auto;
+        right: 20px;
+        bottom: 20px;
+        max-width: 180px;
     }
     
     .layer-toggles {
@@ -716,9 +733,44 @@ table th {
         left: auto;
     }
     
+    /* Hide heatmap toggle on mobile */
+    .sidebar .layer-toggles {
+        display: none;
+    }
+    
+    /* Hide Show Hotspots button on mobile - more specific selector */
+    .map-container .map-control-button {
+        display: none !important;
+    }
+    
     .sidebar.hidden ~ .map-container .layer-toggles {
         left: auto;
         right: 20px;
+    }
+    
+    /* Stack buttons vertically on mobile */
+    .map-credits {
+        bottom: 20px;
+        left: 20px;
+        right: auto;
+        font-size: 0.8rem;
+        max-width: 180px;
+        width: auto;
+    }
+    
+    .subscribe-btn {
+        bottom: 70px;
+        left: 20px;
+        right: auto;
+        font-size: 0.85rem;
+        max-width: 180px;
+        width: auto;
+    }
+    
+    .sidebar-show-btn {
+        top: 20px;
+        left: 20px;
+        z-index: 50;
     }
 }
 
@@ -750,18 +802,6 @@ table th {
 
 .sidebar.hidden ~ .map-container .map-control-button {
     left: 70px;
-}
-
-@media (max-width: 768px) {
-    .map-control-button {
-        left: auto;
-        right: 20px;
-    }
-    
-    .sidebar.hidden ~ .map-container .map-control-button {
-        left: auto;
-        right: 20px;
-    }
 }
 
 .map-control-button:hover {
@@ -1190,17 +1230,17 @@ table th {
 
 .map-credits {
     position: absolute;
-    bottom: 45px;
+    bottom: 20px;
     left: 20px;
     z-index: 5;
-    font-size: 0.75rem;
-    background-color: rgba(40, 44, 52, 0.85);
-    padding: 6px 10px;
+    font-size: 0.8rem;
+    background-color: rgba(40, 44, 52, 0.95);
+    padding: 8px 12px;
     border-radius: 4px;
-    transition: left 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    display: inline-block;
+    width: auto;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .map-credits a {
@@ -1208,6 +1248,7 @@ table th {
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease;
+    display: inline-block;
 }
 
 .map-credits a:hover {
@@ -1216,16 +1257,20 @@ table th {
 
 .subscribe-btn {
     position: absolute;
-    bottom: 45px;
-    left: 150px;
+    bottom: 70px;
+    left: 20px;
     background-color: #2e8b57; /* Forest green */
     color: white !important;
-    padding: 5px 10px;
+    padding: 8px 12px;
     border-radius: 4px;
     font-size: 0.85rem;
     text-decoration: none;
     transition: background-color 0.2s ease;
     z-index: 5;
+    text-align: left;
+    width: auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    line-height: 1.3;
 }
 
 .subscribe-btn:hover {
@@ -1234,23 +1279,11 @@ table th {
 }
 
 .sidebar.hidden ~ .map-container .map-credits {
-    left: 70px;
+    left: 20px;
 }
 
 .sidebar.hidden ~ .map-container .subscribe-btn {
-    left: 200px;
-}
-
-@media (max-width: 768px) {
-    .map-credits {
-        bottom: 20px;
-        left: 20px;
-    }
-    
-    .subscribe-btn {
-        bottom: 60px;
-        left: 20px;
-    }
+    left: 20px;
 }
 
 .hotspot-help-message {

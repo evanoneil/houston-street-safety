@@ -399,7 +399,7 @@ function setupSidebarToggle() {
             layerToggles.style.left = '80px';
         }
         if (mapCredits) {
-            mapCredits.style.left = '70px';
+            mapCredits.style.left = '20px';
         }
     });
     
