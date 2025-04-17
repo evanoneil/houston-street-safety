@@ -354,13 +354,10 @@ class MapHandler {
         // Determine severity class for header color
         const severityClass = properties.severity.toLowerCase();
         
-        // Extract speed limit from street name
+        // Get speed limit text from the dedicated field
         let speedLimitText = '';
-        if (properties.streetName) {
-            const match = properties.streetName.match(/\s+(\d+)$/);
-            if (match && match[1]) {
-                speedLimitText = `<span class="crash-speed-limit">Speed limit: ${match[1]}</span>`;
-            }
+        if (properties.speedLimit) {
+            speedLimitText = `<span class="crash-speed-limit">Speed limit: ${properties.speedLimit} mph</span>`;
         }
         
         // Format light conditions and weather if available
@@ -382,8 +379,8 @@ class MapHandler {
                     <div class="crash-date"><strong>Date:</strong> ${properties.date} at ${this.formatTime(properties.time)}</div>
                     <div class="crash-details">
                         <span class="crash-type ${properties.type}">${crashType}</span>
-                        ${speedLimitText}
                     </div>
+                    ${speedLimitText ? `<div class="crash-speed">${speedLimitText}</div>` : ''}
                     <div class="crash-conditions">
                         ${conditionsHTML}
                     </div>
@@ -408,8 +405,8 @@ class MapHandler {
                 <h4 class="${severityClass}">${crashType} Crash #${properties.id}</h4>
                 <div class="crash-details">
                     <span class="crash-type ${properties.type}">${crashType}</span>
-                    ${speedLimitText}
                 </div>
+                ${speedLimitText ? `<div class="crash-speed">${speedLimitText}</div>` : ''}
                 <div class="crash-date"><strong>Date:</strong> ${properties.date} at ${this.formatTime(properties.time)}</div>
                 <div class="crash-conditions">
                     ${conditionsHTML}

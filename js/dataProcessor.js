@@ -181,7 +181,38 @@ class DataProcessor {
                 }
             }
             
-            const streetName = d['Street Name'] || 'Unknown';
+            // Process street name and speed limit 
+            let originalStreetName = d['Street Name'] || 'Unknown';
+            let speedLimit = null;
+            let cleanStreetName = originalStreetName;
+            
+            // First check for a dedicated speed limit field
+            if (d['Speed Limit']) {
+                const speedLimitStr = d['Speed Limit'].trim();
+                if (/^\d+$/.test(speedLimitStr)) {
+                    speedLimit = parseInt(speedLimitStr);
+                }
+            }
+            
+            // If no dedicated speed limit field, try to extract from street name
+            if (!speedLimit && originalStreetName && originalStreetName !== 'Unknown') {
+                // Check for a number at the end of the street name
+                const match = originalStreetName.match(/\s+(\d+)$/);
+                if (match && match[1]) {
+                    speedLimit = parseInt(match[1]);
+                    // Store the clean street name without the speed limit
+                    cleanStreetName = originalStreetName.replace(/\s+\d+$/, '').trim();
+                }
+            }
+            
+            // Handle cases where the street name is just a number (likely a speed limit)
+            if (/^\d+$/.test(cleanStreetName)) {
+                // If the entire "street name" is a number, it's probably a speed limit
+                if (!speedLimit) {
+                    speedLimit = parseInt(cleanStreetName);
+                }
+                cleanStreetName = 'Unknown';
+            }
             
             // Parse and clean weather condition
             let weather = d['Weather Condition'] || '';
@@ -222,7 +253,8 @@ class DataProcessor {
                 factors,
                 atIntersection,
                 intersectionDetails,
-                streetName,
+                streetName: cleanStreetName,
+                speedLimit,
                 weather,
                 lightCondition,
                 // Additional information for popup
@@ -234,7 +266,8 @@ class DataProcessor {
                     time,
                     location,
                     factors,
-                    streetName,
+                    streetName: cleanStreetName,
+                    speedLimit,
                     weather,
                     lightCondition,
                     intersectionDetails
@@ -346,23 +379,53 @@ class DataProcessor {
             countByYear[year] = data.filter(d => d.year === year).length;
         });
         
-        // Count by month
-        const countByMonth = {};
-        for (let i = 1; i <= 12; i++) {
-            countByMonth[i] = data.filter(d => d.month === i).length;
-        }
+        // Count by speed limit - group into ranges for better analysis
+        const speedLimitGroups = {
+            '0-25': data.filter(d => d.speedLimit !== null && d.speedLimit <= 25).length,
+            '30-35': data.filter(d => d.speedLimit !== null && d.speedLimit >= 30 && d.speedLimit <= 35).length,
+            '40-45': data.filter(d => d.speedLimit !== null && d.speedLimit >= 40 && d.speedLimit <= 45).length,
+            '50+': data.filter(d => d.speedLimit !== null && d.speedLimit >= 50).length,
+            'Unknown': data.filter(d => d.speedLimit === null).length
+        };
         
-        // Count at intersections
-        const countAtIntersection = data.filter(d => d.atIntersection).length;
+        // Count fatalities by speed limit
+        const fatalitiesBySpeedLimit = {
+            '0-25': data.filter(d => d.speedLimit !== null && d.speedLimit <= 25 && d.severity === 'K').length,
+            '30-35': data.filter(d => d.speedLimit !== null && d.speedLimit >= 30 && d.speedLimit <= 35 && d.severity === 'K').length,
+            '40-45': data.filter(d => d.speedLimit !== null && d.speedLimit >= 40 && d.speedLimit <= 45 && d.severity === 'K').length,
+            '50+': data.filter(d => d.speedLimit !== null && d.speedLimit >= 50 && d.severity === 'K').length,
+            'Unknown': data.filter(d => d.speedLimit === null && d.severity === 'K').length
+        };
+        
+        // Count crashes where factors mention speed or speeding
+        const speedRelatedCount = data.filter(d => {
+            if (!d.factors) return false;
+            const factorsLower = d.factors.toLowerCase();
+            return factorsLower.includes('speed') || 
+                   factorsLower.includes('speeding') || 
+                   factorsLower.includes('unsafe speed') ||
+                   factorsLower.includes('over the limit');
+        }).length;
+        
+        // Count fatalities where factors mention speed or speeding
+        const speedRelatedFatalities = data.filter(d => {
+            if (!d.factors || d.severity !== 'K') return false;
+            const factorsLower = d.factors.toLowerCase();
+            return factorsLower.includes('speed') || 
+                   factorsLower.includes('speeding') || 
+                   factorsLower.includes('unsafe speed') ||
+                   factorsLower.includes('over the limit');
+        }).length;
         
         return {
             totalCount,
             countBySeverity,
             countByType,
             countByYear,
-            countByMonth,
-            countAtIntersection,
-            percentAtIntersection: totalCount > 0 ? (countAtIntersection / totalCount * 100).toFixed(1) : 0
+            speedLimitGroups,
+            fatalitiesBySpeedLimit,
+            speedRelatedCount,
+            speedRelatedFatalities
         };
     }
 }

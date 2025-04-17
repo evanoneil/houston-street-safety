@@ -146,6 +146,48 @@ class AnalysisHandler {
                 </div>
             `;
             
+            // Add speed limit breakdown
+            statsHTML += `
+                <div class="chart-container">
+                    <h5>Speed Limit Analysis</h5>
+                    <div class="bar-chart">
+            `;
+            
+            // Get the maximum count for scaling
+            const speedLimitGroups = Object.values(stats.speedLimitGroups);
+            const maxSpeedLimitCount = Math.max(...speedLimitGroups);
+            
+            // Define speed limit groups with colors
+            const speedLimits = [
+                { range: '0-25', label: '0-25 mph', class: 'speed-low' },
+                { range: '30-35', label: '30-35 mph', class: 'speed-medium' },
+                { range: '40-45', label: '40-45 mph', class: 'speed-high' },
+                { range: '50+', label: '50+ mph', class: 'speed-very-high' },
+                { range: 'Unknown', label: 'Unknown', class: 'speed-unknown' }
+            ];
+            
+            speedLimits.forEach(speedLimit => {
+                const count = stats.speedLimitGroups[speedLimit.range];
+                if (count > 0) {
+                    const barWidth = maxSpeedLimitCount > 0 ? (count / maxSpeedLimitCount * 100) : 0;
+                    
+                    statsHTML += `
+                        <div class="chart-bar">
+                            <div class="chart-label">${speedLimit.label}</div>
+                            <div class="chart-bar-container">
+                                <div class="chart-bar-fill ${speedLimit.class}" style="width: ${barWidth}%"></div>
+                            </div>
+                            <div class="chart-value">${count}</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            statsHTML += `
+                    </div>
+                </div>
+            `;
+            
             // Add type breakdown if showing all types
             if (this.currentType === 'all') {
                 const pedestrianCount = stats.countByType.pedestrian;
@@ -213,7 +255,159 @@ class AnalysisHandler {
             
             // Update the content
             statsElement.innerHTML = statsHTML;
+            
+            // Update speed limit analysis tab if it exists
+            const speedLimitElement = document.getElementById('speed-limit-content');
+            if (speedLimitElement) {
+                this.updateSpeedLimitAnalysis(speedLimitElement, stats);
+            }
         }
+    }
+    
+    // Update the speed limit analysis tab
+    updateSpeedLimitAnalysis(element, stats) {
+        let speedLimitHTML = `
+            <div class="active-filters">
+                <p>This analysis shows the relationship between speed limits and crash severity.</p>
+            </div>
+            
+            <div class="chart-container">
+                <h5>Crashes by Speed Limit</h5>
+                <div class="bar-chart">
+        `;
+        
+        // Get the maximum count for scaling
+        const speedLimitGroups = Object.values(stats.speedLimitGroups);
+        const maxSpeedLimitCount = Math.max(...speedLimitGroups);
+        
+        // Define speed limit groups with colors
+        const speedLimits = [
+            { range: '0-25', label: '0-25 mph', class: 'speed-low' },
+            { range: '30-35', label: '30-35 mph', class: 'speed-medium' },
+            { range: '40-45', label: '40-45 mph', class: 'speed-high' },
+            { range: '50+', label: '50+ mph', class: 'speed-very-high' },
+            { range: 'Unknown', label: 'Unknown', class: 'speed-unknown' }
+        ];
+        
+        speedLimits.forEach(speedLimit => {
+            const count = stats.speedLimitGroups[speedLimit.range];
+            if (count > 0) {
+                const barWidth = maxSpeedLimitCount > 0 ? (count / maxSpeedLimitCount * 100) : 0;
+                
+                speedLimitHTML += `
+                    <div class="chart-bar">
+                        <div class="chart-label">${speedLimit.label}</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill ${speedLimit.class}" style="width: ${barWidth}%"></div>
+                        </div>
+                        <div class="chart-value">${count}</div>
+                    </div>
+                `;
+            }
+        });
+        
+        speedLimitHTML += `
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h5>Fatalities by Speed Limit</h5>
+                <p class="chart-description">This chart shows the count of fatal crashes at different posted speed limits.</p>
+                <div class="bar-chart">
+        `;
+        
+        // Get the maximum count for scaling
+        const fatalityCounts = Object.values(stats.fatalitiesBySpeedLimit);
+        const maxFatalityCount = Math.max(...fatalityCounts);
+        
+        speedLimits.forEach(speedLimit => {
+            const count = stats.fatalitiesBySpeedLimit[speedLimit.range];
+            if (count > 0) {
+                const barWidth = maxFatalityCount > 0 ? (count / maxFatalityCount * 100) : 0;
+                
+                speedLimitHTML += `
+                    <div class="chart-bar">
+                        <div class="chart-label">${speedLimit.label}</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill ${speedLimit.class}" style="width: ${barWidth}%"></div>
+                        </div>
+                        <div class="chart-value">${count}</div>
+                    </div>
+                `;
+            }
+        });
+        
+        speedLimitHTML += `
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <h5>Fatality Rate by Speed Limit</h5>
+                <p class="chart-description">This chart shows the percentage of crashes that resulted in fatalities at each speed limit range.</p>
+                <div class="bar-chart">
+        `;
+        
+        // Calculate fatality rates
+        const fatalityRates = {};
+        let maxRate = 0;
+        
+        speedLimits.forEach(speedLimit => {
+            const totalCrashes = stats.speedLimitGroups[speedLimit.range];
+            const fatalCrashes = stats.fatalitiesBySpeedLimit[speedLimit.range];
+            
+            if (totalCrashes > 0) {
+                const rate = (fatalCrashes / totalCrashes) * 100;
+                fatalityRates[speedLimit.range] = rate;
+                maxRate = Math.max(maxRate, rate);
+            } else {
+                fatalityRates[speedLimit.range] = 0;
+            }
+        });
+        
+        speedLimits.forEach(speedLimit => {
+            const rate = fatalityRates[speedLimit.range];
+            if (rate > 0) {
+                const barWidth = maxRate > 0 ? (rate / maxRate * 100) : 0;
+                
+                speedLimitHTML += `
+                    <div class="chart-bar">
+                        <div class="chart-label">${speedLimit.label}</div>
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-fill ${speedLimit.class}" style="width: ${barWidth}%"></div>
+                        </div>
+                        <div class="chart-value">${rate.toFixed(1)}%</div>
+                    </div>
+                `;
+            }
+        });
+        
+        speedLimitHTML += `
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h5>Speed-Related Crashes</h5>
+                <p class="chart-description">Number of crashes where the crash report mentions speed or speeding as a contributing factor.</p>
+                <div class="speed-related-stats">
+                    <div class="stat-summary">
+                        <div>
+                            <h3>${stats.speedRelatedCount}</h3>
+                            <p>Total speed-related crashes</p>
+                        </div>
+                        <div>
+                            <h3>${stats.speedRelatedFatalities}</h3>
+                            <p>Fatal speed-related crashes</p>
+                        </div>
+                        <div>
+                            <h3>${stats.speedRelatedCount > 0 ? ((stats.speedRelatedCount / stats.totalCount) * 100).toFixed(1) : 0}%</h3>
+                            <p>of all crashes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        element.innerHTML = speedLimitHTML;
     }
 
     // Update hotspot analysis
